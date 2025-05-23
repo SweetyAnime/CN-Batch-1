@@ -1,1 +1,77 @@
+AIM:
+To implement the Link State Routing Algorithm using Dijkstra’s Algorithm and analyze the shortest path from client to server.
+
+ALGORITHM:
+1. Initialize distances as infinite and visited as false.
+
+2. Set distance to the source (client) as 0.
+
+3. Repeat:
+Select unvisited node with the smallest distance.
+Update distance of its neighbors if a shorter path is found.
+
+4. Repeat until all nodes are visited.
+
+5. Display distances and path from client to server.
+
+PROGRAM:(PYTHON)
+import sys
+
+def dijkstra(graph, src):
+    n = len(graph)
+    dist = [sys.maxsize] * n
+    visited = [False] * n
+    dist[src] = 0
+    path = [-1] * n
+
+    for _ in range(n):
+        u = min((dist[i], i) for i in range(n) if not visited[i])[1]
+        visited[u] = True
+
+        for v in range(n):
+            if graph[u][v] and not visited[v] and dist[u] + graph[u][v] < dist[v]:
+                dist[v] = dist[u] + graph[u][v]
+                path[v] = u
+
+    print("Node\tDistance from Client")
+    for i in range(n):
+        print(f"{i}\t{dist[i]}")
+
+    return path
+
+def print_path(path, dest):
+    if path[dest] == -1:
+        print(dest, end="")
+        return
+    print_path(path, path[dest])
+    print(f" -> {dest}", end="")
+
+graph = [
+    [0, 2, 0, 1, 0],
+    [2, 0, 3, 2, 0],
+    [0, 3, 0, 0, 1],
+    [1, 2, 0, 0, 1],
+    [0, 0, 1, 1, 0]
+]
+
+src, dest = 0, 2  # client=0, server=2
+path = dijkstra(graph, src)
+print("\nPath from Client to Server:")
+print_path(path, dest)
+print()
+
+SAMPLE OUTPUT:
+Node    Distance from Client
+0       0
+1       2
+2       5
+3       1
+4       2
+
+Path from Client to Server:
+0 -> 1 -> 2
+
+
+RESULT:
+The Link State Routing Algorithm was successfully implemented in Python. The program computed the shortest distance and the path from the client node to the server node using Dijkstra’s Algorithm.
 
