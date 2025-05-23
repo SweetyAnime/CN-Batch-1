@@ -1,0 +1,71 @@
+AIM:
+To implement a DNS-like communication using UDP sockets, where the client sends a message broken into user-defined frame sizes, and the server receives and displays each frame.
+---
+
+ALGORITHM:
+Client:
+1. Take input string and frame size from user.
+2. Break input into frames.
+3. Send each frame to the server using UDP.
+
+Server:
+1. Receive each frame.
+2. Print/display it.
+
+---
+
+PROGRAM:
+
+1.Server (dns_server.py):
+
+import socket
+
+s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+s.bind(('localhost', 5050))
+print("DNS UDP Server Listening...")
+
+while True:
+    data, addr = s.recvfrom(1024)
+    if data.decode() == "END":
+        break
+    print(f"Received Frame: {data.decode()}")
+
+
+--------------------
+
+
+2.Client (dns_client.py):
+
+import socket
+
+s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+server_address = ('localhost', 5050)
+
+data = input("Enter data to send: ")
+frame_size = int(input("Enter frame size: "))
+
+for i in range(0, len(data), frame_size):
+    frame = data[i:i+frame_size]
+    s.sendto(frame.encode(), server_address)
+
+s.sendto("END".encode(), server_address)
+
+
+---
+OUTPUT:
+
+1.Client:
+
+Enter data to send: hellodnsserver
+Enter frame size: 4
+
+2.Server:
+
+Received Frame: hell
+Received Frame: odns
+Received Frame: serv
+Received Frame: er
+---
+
+RESULT:
+The UDP client successfully splits the message into frames based on user input and sends them to the server. The server receives and displays each frame.
