@@ -1,0 +1,94 @@
+a) 
+AIM:
+To transfer a file using TCP socket programming in Python.
+
+ALGORITHM:
+1. Server waits for client connection.
+2. Client sends the filename to request.
+3. Server reads the file and sends the content.
+4. Client receives and saves/displays the file content.
+
+PROGRAM(PYTHON):
+1. Server:
+
+import socket
+
+server = socket.socket()
+server.bind(('0.0.0.0', 8080))
+server.listen(1)
+print("Server listening...")
+
+conn, addr = server.accept()
+print("Connected by", addr)
+
+filename = conn.recv(1024).decode()
+try:
+    with open(filename, 'r') as f:
+        data = f.read()
+        conn.send(data.encode())
+except:
+    conn.send(b"File not found.")
+
+conn.close()
+server.close()
+
+2. Client:
+
+import socket
+
+client = socket.socket()
+client.connect(('127.0.0.1', 8080))
+
+filename = input("Enter filename to request: ")
+client.send(filename.encode())
+
+data = client.recv(10240).decode()
+print("\nReceived content:\n", data)
+
+client.close()
+
+SAMPLE OUTPUT:
+1. Client:
+Enter filename to request: test.txt
+
+Received content:
+Hello from server!
+
+2. Server:
+Server listening...
+Connected by ('127.0.0.1', 56544)
+
+RESULT:
+File transfer was successfully implemented using TCP sockets in Python.
+
+-----------------------
+b)
+AIM:
+To capture FTP username and password using Wireshark during a file transfer performed by a Python script.
+
+ALGORITHM:
+1. Use Python’s ftplib to connect to an FTP server and log in.
+2. Start Wireshark and capture traffic on the network interface.
+3. Apply filter in Wireshark to extract login credentials.
+
+PROGRAM(PYTHON):
+
+from ftplib import FTP
+
+ftp = FTP('ftp.dlptest.com')  
+ftp.login(user='dlpuser', passwd='rNrKYTX9g7z3RgJRmxWuGHbeu')
+print("Connected to FTP server.")
+ftp.quit()
+
+
+OUTPUT:
+USER dlpuser
+PASS rNrKYTX9g7z3RgJRmxWuGHbeu
+
+RESULT:
+The username and password sent to the FTP server were successfully captured using Wireshark. This confirms that FTP is insecure, and SFTP or FTPS should be used in real applications.
+
+
+
+
+
