@@ -148,6 +148,61 @@ $ns run
 
 --------------
 
+ithu nee kudutha program:
+set ns [new Simulator]
+set nf [open out.nam w]
+set tr [open out.tr w]
+
+$ns namtrace-all $nf
+$ns trace-all $tr
+
+set topo [new Topography]
+$topo load_flatgrid 500 500
+
+create-god 10
+
+# Node configuration (uncomment for DSDV)
+# $ns node-config -adhocRouting DSDV \
+#                 -llType LL -macType Mac/802_11 \
+#                 -ifqType Queue/DropTail/PriQueue -ifqLen 50 \
+#                 -antType Antenna/OmniAntenna \
+#                 -propType Propagation/TwoRayGround \
+#                 -phyType Phy/WirelessPhy \
+#                 -channelType Channel/WirelessChannel \
+#                 -topoInstance $topo \
+#                 -agentTrace ON -routerTrace ON -macTrace OFF
+
+# Create nodes
+for {set i 0} {$i < 10} {incr i} {
+    set n($i) [$ns node]
+    $n($i) random-motion 0
+}
+
+# Movement
+$ns at 1.0 "$n(0) setdest 250 250 10"
+$ns at 1.0 "$n(1) setdest 100 100 15"
+
+# Traffic setup
+set udp [new Agent/UDP]; $ns attach-agent $n(0) $udp
+set null [new Agent/Null]; $ns attach-agent $n(1) $null
+$ns connect $udp $null
+
+set cbr [new Application/Traffic/CBR]
+$cbr set packetSize_ 512; $cbr set interval_ 0.5
+$cbr attach-agent $udp
+
+$ns at 2.0 "$cbr start"
+$ns at 10.0 "finish"
+
+proc finish {} {
+    global ns nf tr
+    $ns flush-trace; close $nf; close $tr; exit 0
+}
+
+$ns run
+
+------------------------
+
 SAMPLE OUTPUT:
 
 (From the .tr file, or assume values for record)
