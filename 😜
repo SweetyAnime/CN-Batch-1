@@ -1,0 +1,94 @@
+AIM:
+To simulate a 4-node point-to-point network in NS2 with:
+1.Links: n0-n2, n1-n2, and n2-n3
+2.TCP connection between n0 and n3
+3.UDP connection between n1 and n3
+4.Relevant applications over both connections to measure packets sent
+
+ALGORITHM:
+1. Create 4 nodes: n0, n1, n2, n3
+
+2. Establish point-to-point links: n0-n2, n1-n2, n2-n3
+
+3. Set up:
+TCP agent from n0 to n3
+UDP agent from n1 to n3
+
+4. Attach FTP to TCP, CBR to UDP
+
+5. Run simulation and print trace to count packets
+
+PROGRAM:(tcp_udp_sim.tcl):
+# Create a simulator object
+set ns [new Simulator]
+
+# Open trace files
+set f [open out.tr w]
+$ns trace-all $f
+
+# Create nodes
+set n0 [$ns node]
+set n1 [$ns node]
+set n2 [$ns node]
+set n3 [$ns node]
+
+# Create point-to-point links
+$ns duplex-link $n0 $n2 1Mb 10ms DropTail
+$ns duplex-link $n1 $n2 1Mb 10ms DropTail
+$ns duplex-link $n2 $n3 1Mb 10ms DropTail
+
+# TCP connection: n0 -> n3
+set tcp [new Agent/TCP]
+$ns attach-agent $n0 $tcp
+set sink1 [new Agent/TCPSink]
+$ns attach-agent $n3 $sink1
+$ns connect $tcp $sink1
+set ftp [new Application/FTP]
+$ftp attach-agent $tcp
+$ftp set type_ FTP
+
+# UDP connection: n1 -> n3
+set udp [new Agent/UDP]
+$ns attach-agent $n1 $udp
+set null [new Agent/Null]
+$ns attach-agent $n3 $null
+$ns connect $udp $null
+set cbr [new Application/Traffic/CBR]
+$cbr attach-agent $udp
+$cbr set packetSize_ 500
+$cbr set interval_ 0.005
+
+# Start and stop times
+$ns at 0.5 "$ftp start"
+$ns at 0.6 "$cbr start"
+$ns at 4.5 "$ftp stop"
+$ns at 4.6 "$cbr stop"
+
+# Stop the simulation
+$ns at 5.0 "finish"
+
+# Define finish procedure
+proc finish {} {
+    global ns f
+    $ns flush-trace
+    close $f
+    exit 0
+}
+
+# Run simulation
+$ns run
+
+OUTPUT:
+After running the simulation with:
+ns tcp_udp_sim.tcl
+
+You’ll get a trace file out.tr. To find the number of packets sent:
+
+grep "^s.*tcp" out.tr | wc -l   # TCP packets
+grep "^s.*udp" out.tr | wc -l   # UDP packets
+
+RESULT:
+Successfully implemented a four-node point-to-point network using NS2. TCP and UDP agents were configured between n0-n3 and n1-n3 respectively, and the number of packets sent over each protocol was analyzed using the trace file.
+
+
+
