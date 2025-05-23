@@ -1,0 +1,82 @@
+AIM:
+To simulate and examine the performance of Congestion Control Algorithms (e.g., TCP Tahoe and TCP Reno) using NS2.
+
+ALGORITHM:
+1. Create a network topology using 4 nodes.
+2. Set up TCP agents with different congestion control algorithms (Tahoe, Reno).
+3. Connect them with FTP applications.
+4. Monitor packet flow using trace files.
+5. Analyze the performance using trace or Xgraph.
+
+---
+
+Program(TCL SCRIPT):
+
+# Create simulator
+set ns [new Simulator]
+
+# Open trace and nam files
+set tf [open out.tr w]
+$ns trace-all $tf
+
+# Define nodes
+set n0 [$ns node]
+set n1 [$ns node]
+set n2 [$ns node]
+set n3 [$ns node]
+
+# Create links
+$ns duplex-link $n0 $n2 1Mb 10ms DropTail
+$ns duplex-link $n1 $n2 1Mb 10ms DropTail
+$ns duplex-link $n2 $n3 1Mb 10ms DropTail
+
+# Set TCP Tahoe
+set tcp1 [new Agent/TCP]
+$tcp1 set class_ 1
+$tcp1 set tcpType_ Tahoe
+set sink1 [new Agent/TCPSink]
+$ns attach-agent $n0 $tcp1
+$ns attach-agent $n3 $sink1
+$ns connect $tcp1 $sink1
+set ftp1 [new Application/FTP]
+$ftp1 attach-agent $tcp1
+$ftp1 set type_ FTP
+
+# Set TCP Reno
+set tcp2 [new Agent/TCP]
+$tcp2 set class_ 2
+$tcp2 set tcpType_ Reno
+set sink2 [new Agent/TCPSink]
+$ns attach-agent $n1 $tcp2
+$ns attach-agent $n3 $sink2
+$ns connect $tcp2 $sink2
+set ftp2 [new Application/FTP]
+$ftp2 attach-agent $tcp2
+$ftp2 set type_ FTP
+
+# Start traffic
+$ns at 0.5 "$ftp1 start"
+$ns at 1.0 "$ftp2 start"
+$ns at 5.0 "finish"
+
+proc finish {} {
+    global ns tf
+    $ns flush-trace
+    close $tf
+    exit 0
+}
+
+$ns run
+
+------------------------------------
+
+OUTPUT:
+
+Trace File: out.tr records all packet events.
+
+Analyze with tools like:
+XGraph for performance (throughput, congestion window)
+awk/grep for packet loss or delay
+
+RESULT:
+The simulation demonstrates the behavior of TCP Tahoe and Reno under congestion. Performance can be compared based on packet delivery, delay, and drop rate.
