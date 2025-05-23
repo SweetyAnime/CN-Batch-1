@@ -1,1 +1,55 @@
+AIM:
+To implement a UDP-based Echo client and server in C where the client verifies if the received message is the same as the one sent.
 
+ALGORITHM:
+1.Server:
+1. Create a UDP socket.
+2. Bind it to a local port.
+3. Receive a message from the client.
+4. Send the same message back to the client.
+
+2.Client:
+1. Create a UDP socket.
+2. Send a message to the server.
+3. Receive the echoed message.
+4. Compare the received message with the sent one.
+
+PROGRAMS:
+1. SERVER:
+#include <stdio.h>
+#include <string.h>
+#include <netinet/in.h>
+
+int main() {
+    int s = socket(2, 2, 0); char msg[100];
+    struct sockaddr_in a = {2, htons(1234), 0}, c; socklen_t l = sizeof(c);
+    bind(s, (void*)&a, sizeof a);
+    recvfrom(s, msg, 100, 0, (void*)&c, &l);
+    sendto(s, msg, 100, 0, (void*)&c, l); close(s);
+}
+
+
+2. CLIENT:
+#include <stdio.h>
+#include <string.h>
+#include <netinet/in.h>
+
+int main() {
+    int s = socket(2, 2, 0); char msg[100], rcv[100];
+    struct sockaddr_in a = {2, htons(1234), inet_addr("127.0.0.1")};
+    printf("Enter message: "); scanf("%s", msg);
+    sendto(s, msg, 100, 0, (void*)&a, sizeof a);
+    recvfrom(s, rcv, 100, 0, 0, 0);
+    printf("Received: %s\n", rcv);
+    if (strcmp(msg, rcv) == 0) printf("Match OK\n");
+    else printf("Mismatch!\n");
+    close(s);
+}
+
+Sample Output:
+Enter message: hello
+Received: hello
+Match OK
+
+RESULT:
+Thus, the UDP Echo client-server programs were successfully executed. The client confirmed that the echoed message received from the server matched the sent message.
