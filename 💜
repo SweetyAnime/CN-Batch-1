@@ -1,1 +1,72 @@
+AIM:
+To write a program in C using UDP where the client takes input from the user, sends it to the server, and displays the data received back from the server.
 
+ALGORITHM:
+1.Server:
+1. Create a UDP socket.
+2. Bind it to a specific port.
+3. Wait for a message from the client.
+4. Send the same message back to the client.
+
+2.Client:
+1. Create a UDP socket.
+2. Read a message from the user.
+3. Send the message to the server.
+4. Receive the echoed message from the server.
+5. Display the received message.
+
+PROGRAMS:
+1.Server:
+
+#include <stdio.h>
+#include <netinet/in.h>
+int main() {
+    int s; char msg[100];
+    struct sockaddr_in serv, cli;
+    socklen_t len = sizeof(cli);
+
+    s = socket(AF_INET, SOCK_DGRAM, 0);
+    serv.sin_family = AF_INET; serv.sin_port = htons(8080);
+    serv.sin_addr.s_addr = INADDR_ANY;
+
+    bind(s, (struct sockaddr*)&serv, sizeof(serv));
+    recvfrom(s, msg, sizeof(msg), 0, (struct sockaddr*)&cli, &len);
+    printf("Received from client: %s\n", msg);
+    sendto(s, msg, sizeof(msg), 0, (struct sockaddr*)&cli, len);
+}
+
+2.Client:
+
+#include <stdio.h>
+#include <netinet/in.h>
+#include <string.h>
+int main() {
+    int s; char msg[100], reply[100];
+    struct sockaddr_in serv;
+    socklen_t len = sizeof(serv);
+
+    s = socket(AF_INET, SOCK_DGRAM, 0);
+    serv.sin_family = AF_INET; serv.sin_port = htons(8080);
+    serv.sin_addr.s_addr = INADDR_ANY;
+
+    printf("Enter message: ");
+    scanf("%s", msg);
+
+    sendto(s, msg, sizeof(msg), 0, (struct sockaddr*)&serv, len);
+    recvfrom(s, reply, sizeof(reply), 0, (struct sockaddr*)&serv, &len);
+
+    printf("Received from server: %s\n", reply);
+}
+
+Sample Output:
+1.Server:
+$ ./server
+Received from client: network
+
+2.Client:
+$ ./client
+Enter message: network
+Received from server: network
+
+RESULT:
+Thus, the UDP Echo client-server program was successfully executed. The client sent a user-input message and displayed the response received from the server.
