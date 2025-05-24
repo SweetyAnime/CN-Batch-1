@@ -1,0 +1,82 @@
+## DNS Implementation using UDP Sockets
+To implement a simple DNS (Domain Name System) using UDP sockets, we will create a client-server architecture. The client will send a domain name to the server, and the server will respond with the corresponding IP address.
+
+### Server Program (DNS Server)
+The server program will act as a DNS server, resolving domain names to IP addresses.
+import socket
+
+def start_dns_server():
+    # Create a UDP socket
+    sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+    # Bind the socket to a specific address and port
+    dns_server_address = ('localhost', 53)
+    sock.bind(dns_server_address)
+    print(f"DNS Server started on {dns_server_address[0]}:{dns_server_address[1]}")
+
+    # Dictionary to store domain name to IP address mappings
+    dns_records = {
+        'example.com': '192.0.2.1',
+        'google.com': '216.58.194.174',
+        # Add more records as needed
+    }
+
+    while True:
+        # Receive data from the client
+        data, address = sock.recvfrom(1024)
+        domain_name = data.decode()
+        print(f"Received request for {domain_name} from {address}")
+
+        # Resolve the domain name to an IP address
+        if domain_name in dns_records:
+            ip_address = dns_records[domain_name]
+            response = ip_address
+        else:
+            response = "Domain not found"
+
+        # Send the response back to the client
+        sock.sendto(response.encode(), address)
+
+if __name__ == "__main__":
+    start_dns_server()
+### Client Program (DNS Client)
+The client program will send a domain name to the DNS server and receive the corresponding IP address.
+import socket
+
+def dns_lookup(domain_name, dns_server_address):
+    # Create a UDP socket
+    sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+    # Send the domain name to the DNS server
+    sock.sendto(domain_name.encode(), dns_server_address)
+    # Receive the response from the DNS server
+    data, address = sock.recvfrom(1024)
+    ip_address = data.decode()
+    print(f"The IP address of {domain_name} is {ip_address}")
+    # Close the socket
+    sock.close()
+
+if __name__ == "__main__":
+    domain_name = input("Enter a domain name: ")
+    dns_server_address = ('localhost', 53)
+    dns_lookup(domain_name, dns_server_address)
+### Running the Programs
+1. Run the server program (DNS server) on a device.
+2. Run the client program (DNS client) on another device or the same device.
+
+### Expected Result
+The client program should receive the IP address of the domain name sent to the DNS server.
+
+### Viva-Voce Preparation
+Be prepared to explain:
+
+1. The basics of DNS and how it works.
+2. The code used in the server and client programs.
+3. How to handle errors and exceptions in the code.
+4. The advantages and disadvantages of using UDP sockets for DNS.
+
+### Code Explanation
+The server program creates a UDP socket, binds it to a specific address and port, and listens for incoming requests. The client program creates a UDP socket, sends a domain name to the DNS server, and receives the corresponding IP address.
+
+### Advice
+- Make sure to run the server program before running the client program.
+- Ensure that the firewall settings on the devices allow incoming UDP traffic on the specified port.
+- You can modify the DNS records in the server program as needed.
