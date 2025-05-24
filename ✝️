@@ -1,0 +1,23 @@
+import socket
+
+def fetch_webpage(host, path="/"):
+    port = 80  # HTTP default port
+    request = f"GET {path} HTTP/1.1\r\nHost: {host}\r\nConnection: close\r\n\r\n"
+    
+    # Create a socket
+    with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+        s.connect((host, port))
+        s.sendall(request.encode())
+        
+        # Receive response
+        response = b""
+        while True:
+            data = s.recv(4096)
+            if not data:
+                break
+            response += data
+    
+    print(response.decode(errors='ignore'))
+
+# Example usage
+fetch_webpage("example.com")
