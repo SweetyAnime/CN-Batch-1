@@ -133,6 +133,44 @@ client.close();
 
 }
 
+---------------------------------
+import java.net.*;
+
+public class Serverrarp {
+    public static void main(String[] args) {
+        try {
+            DatagramSocket server = new DatagramSocket(1309);
+            System.out.println("RARP Server started...");
+
+            String[] ip = {"165.165.80.80", "165.165.79.1"};
+            String[] mac = {"6A:08:AA:C2", "8A:BC:E3:FA"};
+
+            while (true) {
+                byte[] buffer = new byte[1024];
+                DatagramPacket request = new DatagramPacket(buffer, buffer.length);
+                server.receive(request);
+
+                String receivedMAC = new String(request.getData(), 0, request.getLength()).trim();
+                String response = "IP address not found for MAC: " + receivedMAC;
+
+                for (int i = 0; i < mac.length; i++) {
+                    if (receivedMAC.equalsIgnoreCase(mac[i])) {
+                        response = ip[i];
+                        break;
+                    }
+                }
+
+                byte[] responseBytes = response.getBytes();
+                DatagramPacket reply = new DatagramPacket(responseBytes, responseBytes.length, request.getAddress(), request.getPort());
+                server.send(reply);
+            }
+        } catch (Exception e) {
+            System.out.println("Server Error: " + e);
+        }
+    }
+}
+------------------------
+
 OUTPUT
 
 SERVER
