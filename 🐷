@@ -1,0 +1,160 @@
+SERVER CODE: Serverrarp.java
+
+import java.io.*;
+
+import java.net.*;
+
+public class Serverrarp {
+
+ public static void main(String[] args) {
+
+ try {
+
+ DatagramSocket server = new DatagramSocket(1309);
+
+ System.out.println("RARP Server started...");
+
+ // Sample IP-MAC table
+
+ String[] ip = {"165.165.80.80", "165.165.79.1"};
+
+ String[] mac = {"6A:08:AA:C2", "8A:BC:E3:FA"};
+
+ while (true) {
+
+ byte[] receivebyte = new byte[1024];
+
+ DatagramPacket receiver = new DatagramPacket(receivebyte, receivebyte.length);
+
+ server.receive(receiver);
+
+ String receivedMAC = new String(receiver.getData(), 0, receiver.getLength()).trim();
+
+ InetAddress clientAddr = receiver.getAddress();
+
+ int clientPort = receiver.getPort();
+
+ boolean found = false;
+
+ String response = "";
+
+--------------------------
+
+for (int i = 0; i < mac.length; i++) {
+
+ if (receivedMAC.equalsIgnoreCase(mac[i])) {
+
+ response = ip[i];
+
+ found = true;
+
+ break;
+
+ }
+
+ }
+
+ if (!found) {
+
+ response = "IP address not found for MAC: " + receivedMAC;
+
+ System.out.println("MAC not found: " + receivedMAC);
+
+ }
+
+ byte[] sendbyte = response.getBytes();
+
+ DatagramPacket sender = new DatagramPacket(sendbyte, sendbyte.length, clientAddr, clientPort);
+
+ server.send(sender);
+
+ }
+
+ } catch (Exception e) {
+
+ System.out.println("Server Error: " + e);
+
+ }
+
+ }
+
+}
+
+CLIENT PROGRAM : Clientrarp.java
+
+import java.io.*;
+
+import java.net.*;
+
+public class Clientrarp {
+
+ public static void main(String[] args) {
+
+ try {
+
+ DatagramSocket client = new DatagramSocket();
+
+ InetAddress serverAddr = InetAddress.getByName("127.0.0.1");
+
+ BufferedReader in = new BufferedReader(new InputStreamReader(System.in));
+
+ System.out.print("Enter the Physical address (MAC): ");
+
+ String macInput = in.readLine();
+
+ byte[] sendbyte = macInput.getBytes();
+
+ DatagramPacket sender = new DatagramPacket(sendbyte, sendbyte.length, serverAddr, 1309);
+
+ client.send(sender);
+
+ byte[] receivebyte = new byte[1024];
+
+ DatagramPacket receiver = new DatagramPacket(receivebyte, receivebyte.length);
+
+ client.receive(receiver);
+
+ String receivedIP = new String(receiver.getData(), 0, receiver.getLength());
+
+ System.out.println("The Logical Address (IP) is: " + receivedIP.trim());
+
+
+------------------------------------
+
+client.close();
+
+ } catch (Exception e) {
+
+ System.out.println("Client Error: " + e);
+
+ }
+
+ }
+
+}
+
+OUTPUT
+
+SERVER
+
+C:\Users\user47\Documents\PROGRAM RARP>set path="C:\Program Files\Java\jdk-1.8\bin" 
+
+C:\Users\user47\Documents\PROGRAM RARP>javac Serverrarp.java 
+
+C:\Users\user47\Documents\PROGRAM RARP>java Serverrarp
+
+Server started...
+
+CLIENT
+
+C:\Users\user47\Documents\PROGRAM RARP>set path="C:\Program Files\Java\jdk-1.8\bin"
+
+C:\Users\user47\Documents\PROGRAM RARP>javac
+
+Clientrarp.java C:\Users\user47\Documents\PROGRAM 
+
+RARP>java Clientrarp Enter the Physical address (MAC):
+
+6A:08:AA:C2
+
+The Logical Address is (IP): 165.165.80.80
